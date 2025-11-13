@@ -87,6 +87,12 @@ export default function SettingsScreen({ navigation }) {
 
   const saveSetting = async (key, value) => {
     try {
+      // Verifica se a chave é válida antes de salvar
+      if (!key || typeof key !== 'string') {
+        console.warn('Chave inválida para AsyncStorage:', key);
+        return;
+      }
+      
       await AsyncStorage.setItem(key, String(value));
       
       if (key === SETTINGS_KEYS.THEME) {
@@ -101,7 +107,10 @@ export default function SettingsScreen({ navigation }) {
 
   const updateSetting = (key, value) => {
     setSettings(prev => ({ ...prev, [key]: value }));
-    saveSetting(SETTINGS_KEYS[key.toUpperCase()], value);
+    const settingsKey = SETTINGS_KEYS[key.toUpperCase()];
+    if (settingsKey) {
+      saveSetting(settingsKey, value);
+    }
   };
 
   const getTextScale = () => {
@@ -148,14 +157,15 @@ export default function SettingsScreen({ navigation }) {
       subtitle={subtitle || options.find(o => o.value === value)?.label}
       rightElement={<Ionicons name="chevron-forward" size={20} color={palette.textSecondary} />}
       onPress={() => {
+        // Armazena a função temporariamente antes de navegar
+        global.settingsCallback = (newValue) => {
+          onSelect(newValue);
+          navigation.goBack();
+        };
         navigation.navigate('SettingsOption', {
           title,
           options,
           selectedValue: value,
-          onSelect: (newValue) => {
-            onSelect(newValue);
-            navigation.goBack();
-          }
         });
       }}
     />

@@ -8,11 +8,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useData } from '../context/DataContext';
 import { useTheme } from '../context/ThemeContext';
 
-export default function SearchBar({ placeholder, onSearch, area, filtersEnabled, onToggleFilters }) {
+export default function SearchBar({ placeholder, onSearch, area, filtersEnabled, onToggleFilters, compact, style }) {
   const [query, setQuery] = useState('');
   const { searchHistory, pushSearchHistory } = useData();
   const { palette, isDark } = useTheme();
-  const styles = makeStyles(palette);
+  const styles = makeStyles(palette, compact);
 
   useEffect(() => {
     onSearch('');
@@ -28,7 +28,7 @@ export default function SearchBar({ placeholder, onSearch, area, filtersEnabled,
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]}>
       <View style={styles.inputWrap}>
         {typeof onToggleFilters === 'function' && (
           <TouchableOpacity
@@ -59,7 +59,7 @@ export default function SearchBar({ placeholder, onSearch, area, filtersEnabled,
           </TouchableOpacity>
         )}
       </View>
-      {searchHistory[area]?.length ? (
+      {!compact && searchHistory[area]?.length ? (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 8 }}>
           {searchHistory[area].map((h) => (
             <TouchableOpacity key={h} style={[styles.historyChip, { backgroundColor: isDark ? 'rgba(46,169,255,0.12)' : '#E8F0FE' }]} onPress={() => doSearch(h)}>
@@ -73,16 +73,16 @@ export default function SearchBar({ placeholder, onSearch, area, filtersEnabled,
   );
 }
 
-const makeStyles = (palette) =>
+const makeStyles = (palette, compact) =>
   StyleSheet.create({
-    container: { marginBottom: spacing.sm },
+    container: { marginBottom: compact ? 0 : spacing.sm },
     inputWrap: {
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: palette.surface,
       borderRadius: 12,
       paddingHorizontal: spacing.md,
-      height: 46,
+      height: compact ? 41 : 51,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: palette.border,
       shadowColor: '#000',
@@ -111,7 +111,7 @@ const makeStyles = (palette) =>
       shadowOffset: { width: 0, height: 3 },
       elevation: 3,
     },
-    input: { flex: 1, color: palette.textPrimary },
+    input: { flex: 1, color: palette.textPrimary, textAlignVertical: 'center', paddingVertical: 0 },
     historyChip: {
       flexDirection: 'row',
       alignItems: 'center',

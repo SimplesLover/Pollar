@@ -27,7 +27,9 @@ export function ThemeProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    AsyncStorage.setItem('theme_mode', themeMode).catch(() => {});
+    if (themeMode && typeof themeMode === 'string') {
+      AsyncStorage.setItem('theme_mode', themeMode).catch(() => {});
+    }
   }, [themeMode]);
 
   // Toggle between light and dark; if on system, toggle to the opposite of current system

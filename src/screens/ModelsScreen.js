@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { View, FlatList, RefreshControl, StyleSheet } from 'react-native';
+import { View, FlatList, RefreshControl, StyleSheet, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import spacing from '../design/spacing';
 import { useData } from '../context/DataContext';
 import SearchBar from '../components/SearchBar';
 import FilterBar from '../components/FilterBar';
@@ -10,6 +12,8 @@ import HeroHeader from '../components/HeroHeader';
 export default function ModelsScreen({ navigation }) {
   const { models } = useData();
   const { palette } = useTheme();
+  const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [filters, setFilters] = useState({ type: 'todos', brand: 'todos', capacity: 'todos' });
@@ -36,15 +40,27 @@ export default function ModelsScreen({ navigation }) {
   }, [models, filtersEnabled, filters, query]);
 
   const styles = makeStyles(palette);
+  const heroHeight = Math.max(48, Math.min(64, Math.round(width * 0.16)));
+  const padX = Math.round(width * 0.04);
+  const padTop = Math.max(8, Math.round(insets.top * 0.5));
+  const marginBottom = Math.round(width * 0.03);
   return (
     <View style={styles.container}>
-      <HeroHeader title="Consultar Modelos" subtitle="Encontre o modelo ideal para sua necessidade">
+      <HeroHeader 
+        title="Consultar Modelos" 
+        subtitle="Encontre o modelo ideal para sua necessidade"
+        style={{ minHeight: heroHeight, paddingHorizontal: 0, paddingTop: padTop + 28, paddingBottom: spacing.md, paddingRight: spacing.md, justifyContent: 'center', alignItems: 'flex-start', marginBottom }}
+        titleStyle={{ fontSize: 18, marginBottom: 2, paddingLeft: spacing.md + 3 }}
+        subtitleStyle={{ fontSize: 11, marginBottom: 6, paddingLeft: spacing.md + 3 }}
+      >
         <SearchBar
           placeholder="Buscar por nome/código/marca"
           onSearch={setQuery}
           area="models"
           filtersEnabled={filtersEnabled}
           onToggleFilters={() => setFiltersEnabled((prev) => !prev)}
+          compact
+          style={{ alignSelf: 'flex-start', width: '95%', marginLeft: spacing.md + 3 }}
         />
       </HeroHeader>
       {filtersEnabled && <FilterBar kind="models" filters={filters} setFilters={setFilters} />}

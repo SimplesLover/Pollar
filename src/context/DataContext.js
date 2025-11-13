@@ -88,10 +88,14 @@ export function DataProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    AsyncStorage.setItem('favorites_models', JSON.stringify(favoritesModels)).catch(() => {});
+    if (favoritesModels && Array.isArray(favoritesModels)) {
+      AsyncStorage.setItem('favorites_models', JSON.stringify(favoritesModels)).catch(() => {});
+    }
   }, [favoritesModels]);
   useEffect(() => {
-    AsyncStorage.setItem('favorites_parts', JSON.stringify(favoritesParts)).catch(() => {});
+    if (favoritesParts && Array.isArray(favoritesParts)) {
+      AsyncStorage.setItem('favorites_parts', JSON.stringify(favoritesParts)).catch(() => {});
+    }
   }, [favoritesParts]);
 
   const addFavoriteModel = (code) => {
@@ -123,9 +127,10 @@ export function DataProvider({ children }) {
       const list = next[area] || [];
       const updated = [query, ...list.filter((q) => q !== query)].slice(0, 10);
       next[area] = updated;
-      AsyncStorage.setItem(area === 'models' ? 'history_models' : 'history_parts', JSON.stringify(updated)).catch(
-        () => {}
-      );
+      const storageKey = area === 'models' ? 'history_models' : 'history_parts';
+      if (storageKey && updated && Array.isArray(updated)) {
+        AsyncStorage.setItem(storageKey, JSON.stringify(updated)).catch(() => {});
+      }
       return next;
     });
   };

@@ -116,7 +116,7 @@ const createStyles = (palette, textScale = 1) =>
       backgroundColor: palette.surface,
       borderRadius: 16,
       padding: spacing.md,
-      marginBottom: spacing.md,
+      marginBottom: spacing.lg,
       ...shadows.medium,
     },
     dailyDate: { fontSize: 16 * textScale, fontWeight: typography.weight.bold, color: palette.primaryDark },

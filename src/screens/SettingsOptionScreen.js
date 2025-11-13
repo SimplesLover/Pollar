@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
@@ -10,7 +10,18 @@ import shadows from '../design/shadows';
 
 export default function SettingsOptionScreen({ navigation, route }) {
   const { palette } = useTheme();
-  const { title, options, selectedValue, onSelect } = route.params;
+  const { title, options, selectedValue } = route.params;
+  
+  // Usa a função callback armazenada globalmente ou uma função vazia como fallback
+  const onSelect = global.settingsCallback || (() => {});
+  
+  // Limpa a callback quando a tela é desmontada ou quando o usuário volta
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', () => {
+      delete global.settingsCallback;
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   const OptionItem = ({ option, isSelected }) => (
     <TouchableOpacity 
@@ -19,7 +30,11 @@ export default function SettingsOptionScreen({ navigation, route }) {
         { backgroundColor: palette.surface },
         isSelected && { backgroundColor: palette.primary + '20' }
       ]} 
-      onPress={() => onSelect(option.value)}
+      onPress={() => {
+        onSelect(option.value);
+        // Limpa a callback global após uso
+        delete global.settingsCallback;
+      }}
     >
       <View style={styles.optionLeft}>
         <Text style={[styles.optionText, { color: palette.textPrimary }]}>

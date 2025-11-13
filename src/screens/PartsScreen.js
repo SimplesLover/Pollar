@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { View, FlatList, RefreshControl, Modal, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import spacing from '../design/spacing';
 import Text from '../components/Text';
 import { useData } from '../context/DataContext';
 import SearchBar from '../components/SearchBar';
@@ -12,6 +14,7 @@ export default function PartsScreen({ navigation }) {
   const { parts, categories } = useData();
   const { palette } = useTheme();
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [filters, setFilters] = useState({ category: 'todos' });
@@ -37,16 +40,28 @@ export default function PartsScreen({ navigation }) {
 
   const numColumns = width < 600 ? 1 : width < 900 ? 2 : 3;
   const styles = makeStyles(palette);
+  const heroHeight = Math.max(48, Math.min(64, Math.round(width * 0.16)));
+  const padX = Math.round(width * 0.04);
+  const padTop = Math.max(8, Math.round(insets.top * 0.5));
+  const marginBottom = Math.round(width * 0.03);
 
   return (
     <View style={styles.container}>
-      <HeroHeader title="Buscar Peças" subtitle="Encontre a peça ideal para sua necessidade">
+      <HeroHeader 
+        title="Buscar Peças" 
+        subtitle="Encontre a peça ideal para sua necessidade"
+        style={{ minHeight: heroHeight, paddingHorizontal: 0, paddingTop: padTop + 28, paddingBottom: spacing.md, paddingRight: spacing.md, justifyContent: 'center', alignItems: 'flex-start', marginBottom }}
+        titleStyle={{ fontSize: 18, marginBottom: 2, paddingLeft: spacing.md + 3 }}
+        subtitleStyle={{ fontSize: 11, marginBottom: 6, paddingLeft: spacing.md + 3 }}
+      >
         <SearchBar
           placeholder="Buscar por nome/código"
           onSearch={setQuery}
           area="parts"
           filtersEnabled={filtersEnabled}
           onToggleFilters={() => setFiltersEnabled((prev) => !prev)}
+          compact
+          style={{ alignSelf: 'flex-start', width: '95%', marginLeft: spacing.md + 3 }}
         />
       </HeroHeader>
       {filtersEnabled && (

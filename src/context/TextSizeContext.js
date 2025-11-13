@@ -22,7 +22,9 @@ export function TextSizeProvider({ children }) {
   const setTextSize = async (size) => {
     setTextSizeState(size);
     try {
-      await AsyncStorage.setItem('app_text_size', size);
+      if (size && typeof size === 'string') {
+        await AsyncStorage.setItem('app_text_size', size);
+      }
     } catch {}
   };
 

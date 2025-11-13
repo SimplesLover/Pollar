@@ -4,7 +4,7 @@ import Text from './Text';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../context/ThemeContext';
 
-export default function HeroHeader({ title, subtitle, children, style }) {
+export default function HeroHeader({ title, subtitle, children, style, titleStyle, subtitleStyle }) {
   const { palette } = useTheme();
   const styles = makeStyles(palette);
   return (
@@ -14,8 +14,8 @@ export default function HeroHeader({ title, subtitle, children, style }) {
       end={{ x: 1, y: 1 }}
       style={[styles.hero, style]}
     >
-      {title ? <Text style={styles.heroTitle}>{title}</Text> : null}
-      {subtitle ? <Text style={styles.heroSubtitle}>{subtitle}</Text> : null}
+      {title ? <Text style={[styles.heroTitle, titleStyle]}>{title}</Text> : null}
+      {subtitle ? <Text style={[styles.heroSubtitle, subtitleStyle]}>{subtitle}</Text> : null}
       {children}
     </LinearGradient>
   );
