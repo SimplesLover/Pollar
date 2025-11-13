@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "Glacio",
+    "slug": "glacio",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "O app utiliza a câmera para ler códigos QR e de barras."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.glacio",
+      "permissions": ["CAMERA"],
+      "softwareKeyboardLayoutMode": "pan",
+      "androidNavigationBar": {
+        "visible": "immersive",
+        "backgroundColor": "#00000000"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "4b510382-1c41-4caa-a2a2-3cb0f3fadc3d"
+      }
+    },
+    "owner": "zezinho10632"
+  }
+}
