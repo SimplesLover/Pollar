@@ -11,7 +11,6 @@ let BarCodeScanner;
 try {
   BarCodeScanner = require('expo-barcode-scanner').BarCodeScanner;
 } catch (error) {
-  console.warn('Expo BarCode Scanner não está disponível:', error);
 }
 
 export default function QRScannerScreen() {
@@ -32,7 +31,6 @@ export default function QRScannerScreen() {
         const { status } = await BarCodeScanner.requestPermissionsAsync();
         setHasPermission(status === 'granted');
       } catch (error) {
-        console.warn('Erro ao solicitar permissão do scanner:', error);
         setHasPermission(false);
       }
     })();

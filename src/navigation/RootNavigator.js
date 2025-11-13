@@ -156,7 +156,7 @@ export default function RootNavigator() {
             'Favoritos': 'heart-outline',
           };
           const name = map[route.name] || 'ellipse-outline';
-          return <Ionicons name={name} size={isSmall ? 20 : 22} color={color} />;
+          return <Ionicons name={name} size={isSmall ? 20 : 22} color={color} style={{ marginTop: isSmall ? -4 : -5 }} />;
         },
         tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
         tabBarItemStyle: { paddingVertical: isSmall ? 6 : 8 },

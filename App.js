@@ -21,20 +21,16 @@ function AppContainer() {
       try {
         // Hide navigation bar on Android
         if (Platform.OS === 'android') {
-          await NavigationBar.setVisibilityAsync('hidden');
-          await NavigationBar.setBackgroundColorAsync('#00000000');
-          await NavigationBar.setBehaviorAsync('overlay-swipe');
+          if (NavigationBar && NavigationBar.setVisibilityAsync) {
+            await NavigationBar.setVisibilityAsync('hidden');
+          }
         }
         
-        // Set system UI to immersive mode
-        await SystemUI.setSystemUIStyleAsync({
-          visibility: 'immersive',
-          backgroundColor: '#00000000',
-        });
+        if (SystemUI && SystemUI.setBackgroundColorAsync) {
+          await SystemUI.setBackgroundColorAsync('#00000000');
+        }
         
-      } catch (error) {
-        console.warn('Erro ao configurar modo imersivo:', error);
-      }
+      } catch (error) {}
     };
 
     setupImmersiveMode();
