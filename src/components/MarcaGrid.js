@@ -8,7 +8,7 @@ import { wp, hp, fs } from '../constants/theme'
 export default function MarcaGrid() {
   const { width } = useWindowDimensions()
   const cols = useMemo(() => (width < 360 ? 2 : width < 720 ? 3 : 4), [width])
-  const { colors } = useThemeContext()
+  const { colors, isDark } = useThemeContext()
   const nav = useNavigation()
   const gap = wp(2)
   const itemWidth = (width - gap * (cols + 1)) / cols
@@ -24,11 +24,11 @@ export default function MarcaGrid() {
         ItemSeparatorComponent={() => <View style={{ height: gap }} />}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={[styles.card, { width: itemWidth, backgroundColor: colors.card, borderColor: colors.border }]}
+            style={[styles.card, { width: itemWidth, backgroundColor: isDark ? colors.card : colors.secondary, borderColor: colors.border }]}
             onPress={() => nav.navigate('TelaConsultaModelos', { marca: item.nome })}
           >
             <Image source={{ uri: item.logo }} style={styles.logo} />
-            <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>{item.nome}</Text>
+            <Text style={[styles.name, { color: isDark ? colors.text : colors.primary }]} numberOfLines={1}>{item.nome}</Text>
           </TouchableOpacity>
         )}
       />

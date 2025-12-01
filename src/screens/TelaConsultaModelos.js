@@ -79,7 +79,7 @@ export default function TelaConsultaModelos() {
   }, [marca, q, filters])
   const formatLabel = (k) => (k === 'classeEnergetica' ? 'Classe Energetica' : k.charAt(0).toUpperCase() + k.slice(1))
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <AppHeader
         showBack
         title="Consultar Modelos"
@@ -88,7 +88,7 @@ export default function TelaConsultaModelos() {
         bgColor={'#6a9eda'}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, borderRadius: 24, height: hp(5.2), backgroundColor: isDark ? colors.backgroundSecondary : '#0f172a' }}>
+          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, borderRadius: 24, height: hp(5.2), backgroundColor: isDark ? colors.backgroundSecondary : colors.card }}>
             <Ionicons name="search" size={fs(16)} color={colors.textSecondary} />
             <TextInput style={{ flex: 1, fontSize: fs(14), color: colors.text }} placeholder="Buscar por nome/código/marca" placeholderTextColor={colors.textSecondary} value={q} onChangeText={setQ} />
             <TouchableOpacity onPress={() => setShowFilters(v => !v)} style={{ padding: 10 }}>
@@ -97,7 +97,7 @@ export default function TelaConsultaModelos() {
           </View>
         </View>
       </AppHeader>
-      <View style={{ height: hp(1.5) }} />
+      <View style={{ height: hp(1.5), backgroundColor: colors.background }} />
       {showFilters && (
         <>
           <Pressable style={[StyleSheet.absoluteFillObject, { zIndex: 9 }]} onPress={() => setShowFilters(false)} />
@@ -126,6 +126,7 @@ export default function TelaConsultaModelos() {
         </>
       )}
       <FlatList
+        style={{ backgroundColor: colors.background }}
         data={data}
         keyExtractor={item => item.id}
         numColumns={2}

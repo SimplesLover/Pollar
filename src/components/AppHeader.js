@@ -24,7 +24,7 @@ export default function AppHeader({ title = 'Pollar', subtitle, showBack = false
       </View>
       {subtitle ? (
         <View style={styles.bottomTextWrap}>
-          <Text style={[styles.subtitle, { color: '#eaf2ff' }]}>{subtitle}</Text>
+          <Text style={[styles.subtitle, { color: '#eaf2ff', marginLeft: showBack ? wp(2) : 0 }]}>{subtitle}</Text>
         </View>
       ) : null}
       {children ? <View style={styles.bottom}>{children}</View> : null}
@@ -40,6 +40,6 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: fs(12) },
   button: { padding: 8, borderRadius: 24 },
   iconBtn: { padding: 8 },
-  bottomTextWrap: { paddingHorizontal: wp(4), paddingBottom: 5, marginTop: 0, width: '100%' },
+  bottomTextWrap: { paddingHorizontal: wp(4), paddingBottom: 0, marginTop: 0, width: '100%' },
   bottom: { paddingHorizontal: wp(4), paddingBottom: 5, width: '100%' }
 })

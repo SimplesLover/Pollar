@@ -15,12 +15,13 @@ export default function TelaInicial() {
   const gap = wp(2)
   const itemWidth = (width - gap * (cols + 1)) / cols
   const nav = useNavigation()
-  const { colors } = useThemeContext()
+  const { colors, isDark } = useThemeContext()
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <AppHeader />
       <FlatList
+        style={{ backgroundColor: colors.background }}
         data={MARCAS}
         keyExtractor={item => item.id}
         numColumns={cols}
@@ -42,11 +43,11 @@ export default function TelaInicial() {
         }
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={[styles.card, { width: itemWidth, backgroundColor: colors.card, borderColor: colors.border }]}
+            style={[styles.card, { width: itemWidth, backgroundColor: isDark ? colors.card : colors.secondary, borderColor: colors.border }]}
             onPress={() => nav.navigate('TelaConsultaModelos', { marca: item.nome })}
           >
             <Image source={{ uri: item.logo }} style={styles.logo} />
-            <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>{item.nome}</Text>
+            <Text style={[styles.name, { color: isDark ? colors.text : colors.primary }]} numberOfLines={1}>{item.nome}</Text>
           </TouchableOpacity>
         )}
       />

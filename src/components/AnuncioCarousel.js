@@ -11,7 +11,7 @@ function pickHighlights() {
 }
 
 export default function AnuncioCarousel() {
-  const { colors } = useThemeContext()
+  const { colors, isDark } = useThemeContext()
   const nav = useNavigation()
   const items = useMemo(() => pickHighlights(), [])
   const { width } = useWindowDimensions()
@@ -27,9 +27,9 @@ export default function AnuncioCarousel() {
         keyExtractor={item => item.id}
         showsHorizontalScrollIndicator={false}
         renderItem={({ item, index }) => (
-          <TouchableOpacity onPress={() => nav.navigate('TelaDetalheModelo', { modeloId: item.id })} style={[styles.card, { width: itemSize, height: itemSize, marginLeft: index === 0 ? 0 : gap, backgroundColor: colors.card, borderColor: colors.border }] }>
+          <TouchableOpacity onPress={() => nav.navigate('TelaDetalheModelo', { modeloId: item.id })} style={[styles.card, { width: itemSize, height: itemSize, marginLeft: index === 0 ? 0 : gap, backgroundColor: isDark ? colors.card : colors.secondary, borderColor: colors.border }] }>
             <Image source={{ uri: item.imagem }} style={styles.image} />
-            <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>{item.nome}</Text>
+            <Text style={[styles.name, { color: isDark ? colors.text : colors.primary }]} numberOfLines={1}>{item.nome}</Text>
           </TouchableOpacity>
         )}
       />

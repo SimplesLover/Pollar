@@ -9,7 +9,7 @@ import { wp, hp, fs } from '../constants/theme'
 export default function FavoritosCarousel() {
   const { favoritos } = useFavoritos()
   const nav = useNavigation()
-  const { colors } = useThemeContext()
+  const { colors, isDark } = useThemeContext()
   const { width } = useWindowDimensions()
   const cols = useMemo(() => (width < 360 ? 2 : width < 720 ? 3 : 4), [width])
   const gap = wp(2)
@@ -31,9 +31,9 @@ export default function FavoritosCarousel() {
         keyExtractor={item => item.id}
         showsHorizontalScrollIndicator={false}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => nav.navigate('TelaDetalheModelo', { modeloId: item.id })} style={[styles.card, { width: itemWidth, backgroundColor: colors.card, borderColor: colors.border }] }>
+          <TouchableOpacity onPress={() => nav.navigate('TelaDetalheModelo', { modeloId: item.id })} style={[styles.card, { width: itemWidth, backgroundColor: isDark ? colors.card : colors.secondary, borderColor: colors.border }] }>
             <Image source={{ uri: item.imagem }} style={styles.image} />
-            <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>{item.nome}</Text>
+            <Text style={[styles.name, { color: isDark ? colors.text : colors.primary }]} numberOfLines={1}>{item.nome}</Text>
           </TouchableOpacity>
         )}
       />

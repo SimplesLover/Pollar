@@ -18,7 +18,7 @@ export default function TelaDetalheModelo() {
   const { isFavorito, toggleFavorito } = useFavoritos()
   if (!modelo)
     return (
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
         <AppHeader />
         <View style={{ padding: wp(4) }}>
           <Text style={{ fontSize: fs(16), color: colors.text }}>Modelo não encontrado</Text>
@@ -31,9 +31,9 @@ export default function TelaDetalheModelo() {
     else nav.navigate('TelaInicial')
   }
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <AppHeader showBack title={`Detalhes do Modelo`} onBackPress={handleBack} />
-      <ScrollView>
+      <ScrollView style={{ backgroundColor: colors.background }}>
       <View style={[styles.headerWrap, { backgroundColor: colors.card }] }>
         <Image source={{ uri: modelo.imagem }} style={styles.headerImage} />
         <TouchableOpacity style={styles.headerHeart} onPress={() => toggleFavorito(modelo.id)}>

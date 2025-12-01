@@ -21,7 +21,7 @@ export const lightColors = {
   primaryLight: '#92b9ee',
   secondary: '#cbe2ff',
   tertiary: '#e6f0ff',
-  background: '#eaf3ff',
+  background: '#f2f7ff',
   card: '#e6f0ff',
   text: '#1f2937',
   textSecondary: '#475569',
