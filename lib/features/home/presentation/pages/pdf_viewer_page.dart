@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pollar_app/core/theme/app_colors.dart';
-import 'package:pollar_app/core/widgets/pollar_app_bar.dart';
 
 class PdfViewerPage extends StatefulWidget {
   final String pdfPath;
@@ -35,16 +34,33 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
 
   Future<void> _loadPdf() async {
     try {
-      final bytes = await rootBundle.load(widget.pdfPath);
-      final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/${widget.title}.pdf');
-      await file.writeAsBytes(bytes.buffer.asUint8List());
+      String? path;
 
+      try {
+        final bytes = await rootBundle.load(widget.pdfPath);
+        final dir = await getTemporaryDirectory();
+        final fileName =
+            '${_sanitizedTitle()}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+        final file = File('${dir.path}/$fileName');
+        await file.writeAsBytes(bytes.buffer.asUint8List(), flush: true);
+        path = file.path;
+      } catch (_) {
+        final file = File(widget.pdfPath);
+        if (await file.exists()) {
+          path = file.path;
+        } else {
+          throw Exception('Arquivo não encontrado: ${widget.pdfPath}');
+        }
+      }
+
+      if (!mounted) return;
       setState(() {
-        _localPdfPath = file.path;
+        _localPdfPath = path;
         _isLoading = false;
+        _errorMessage = null;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = 'Erro ao carregar o PDF: $e';
         _isLoading = false;
@@ -52,14 +68,24 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
     }
   }
 
-  @override
-  void dispose() {
+  Future<void> _deleteTempFile() async {
     final path = _localPdfPath;
     if (path != null) {
       try {
-        File(path).deleteSync();
+        final tempDir = await getTemporaryDirectory();
+        if (path.startsWith(tempDir.path)) {
+          final file = File(path);
+          if (await file.exists()) {
+            await file.delete();
+          }
+        }
       } catch (_) {}
     }
+  }
+
+  @override
+  void dispose() {
+    _deleteTempFile();
     super.dispose();
   }
 
@@ -67,163 +93,266 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
-      appBar: PolarAppBar(
-        title: widget.title,
-        showBackButton: true,
+      body: Column(
+        children: [
+          _buildAppBar(),
+          Expanded(
+            child: Stack(
+              children: [
+                _buildBody(),
+                if (_totalPages > 0) _buildPageIndicator(),
+              ],
+            ),
+          ),
+        ],
       ),
-      body: _buildBody(),
-      bottomNavigationBar: _totalPages > 0
-          ? Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, -4),
-                  ),
-                ],
+    );
+  }
+
+  Widget _buildAppBar() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.black.withValues(alpha: 0.6),
+            Colors.black.withValues(alpha: 0.3),
+            Colors.transparent,
+          ],
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.9),
+          ),
+          child: Row(
+            children: [
+              IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: AppColors.textPrimary,
+                  size: 24,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(
+                  minWidth: 40,
+                  minHeight: 40,
+                ),
+                splashRadius: 20,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Text(
-                      '${_currentPage + 1} - $_totalPages',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.darkCard,
-                      ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    widget.title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                      letterSpacing: 0.5,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ],
+                ),
               ),
-            )
-          : null,
+              const SizedBox(width: 45),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _sanitizedTitle() {
+    final sanitized = widget.title.replaceAll(RegExp(r"[^A-Za-z0-9_-]"), "_");
+    return sanitized.isEmpty ? 'manual' : sanitized;
+  }
+
+  Widget _buildPageIndicator() {
+    return Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: [
+              Colors.black.withValues(alpha: 0.6),
+              Colors.black.withValues(alpha: 0.3),
+              Colors.transparent,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Center(
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  '${_currentPage + 1} - $_totalPages',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(
+      return _buildLoadingState();
+    }
+
+    if (_errorMessage != null) {
+      return _buildErrorState();
+    }
+
+    if (_localPdfPath != null) {
+      return _buildPdfView();
+    }
+
+    return _buildEmptyState();
+  }
+
+  Widget _buildLoadingState() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            color: AppColors.primary,
+            strokeWidth: 3,
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Carregando PDF...',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(
-              color: AppColors.primary,
-              strokeWidth: 3,
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFEBEE),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(
+                Icons.error_outline,
+                size: 40,
+                color: Color(0xFFE53935),
+              ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
-              'Carregando PDF...',
-              style: TextStyle(
-                fontSize: 14,
+              _errorMessage!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 15,
                 color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _retryLoading,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'Tentar novamente',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
         ),
-      );
-    }
+      ),
+    );
+  }
 
-    if (_errorMessage != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFEBEE),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Icon(
-                  Icons.error_outline,
-                  size: 40,
-                  color: Color(0xFFE53935),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                _errorMessage!,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _isLoading = true;
-                    _errorMessage = null;
-                  });
-                  _loadPdf();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Tentar novamente',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
+  Widget _buildPdfView() {
+    return PDFView(
+      filePath: _localPdfPath!,
+      enableSwipe: true,
+      swipeHorizontal: false,
+      autoSpacing: false,
+      pageFling: true,
+      pageSnap: true,
+      fitPolicy: FitPolicy.WIDTH,
+      preventLinkNavigation: false,
+      onRender: (pages) {
+        setState(() {
+          _totalPages = pages ?? 0;
+        });
+      },
+      onPageChanged: (page, total) {
+        setState(() {
+          _currentPage = page ?? 0;
+        });
+      },
+      onError: (error) {
+        setState(() {
+          _errorMessage = 'Erro ao renderizar PDF: $error';
+        });
+      },
+      onPageError: (page, error) {
+        setState(() {
+          _errorMessage = 'Erro na página ${(page ?? 0) + 1}: $error';
+        });
+      },
+    );
+  }
 
-    if (_localPdfPath != null) {
-      return PDFView(
-        filePath: _localPdfPath!,
-        enableSwipe: true,
-        swipeHorizontal: false,
-        autoSpacing: false,
-        pageFling: false,
-        pageSnap: false,
-        fitPolicy: FitPolicy.WIDTH,
-        preventLinkNavigation: false,
-        onRender: (pages) {
-          setState(() {
-            _totalPages = pages ?? 0;
-          });
-        },
-        onPageChanged: (page, total) {
-          setState(() {
-            _currentPage = page ?? 0;
-          });
-        },
-        onError: (error) {
-          setState(() {
-            _errorMessage = error.toString();
-          });
-        },
-        onPageError: (page, error) {
-          setState(() {
-            _errorMessage =
-                'Erro ao carregar página $page: ${error.toString()}';
-          });
-        },
-      );
-    }
-
+  Widget _buildEmptyState() {
     return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -244,5 +373,13 @@ class _PdfViewerPageState extends State<PdfViewerPage> {
         ],
       ),
     );
+  }
+
+  void _retryLoading() {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    _loadPdf();
   }
 }

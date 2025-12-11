@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pollar_app/core/theme/app_colors.dart';
+import 'package:pollar_app/core/utils/responsive_helper.dart';
 import 'package:pollar_app/core/widgets/category_card.dart';
 import 'package:pollar_app/core/widgets/pollar_app_bar.dart';
 import 'package:pollar_app/features/home/data/repositories/data_repository.dart';
@@ -15,44 +16,87 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const PolarAppBar(),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 8),
-            const Text(
-              'Categorias',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: Responsive.maxContentWidth(context),
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: Responsive.horizontalPadding(context),
+                vertical: 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Categorias',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Expanded(
+                    child: categories.isEmpty
+                        ? _buildEmptyState()
+                        : _buildCategoriesList(context, categories),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: ListView.separated(
-                itemCount: categories.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 14),
-                itemBuilder: (context, index) {
-                  final category = categories[index];
-                  return CategoryCard(
-                    title: category.name,
-                    icon: category.icon,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const BrandsPage(),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCategoriesList(BuildContext context, List categories) {
+    return ListView.separated(
+      itemCount: categories.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 14),
+      itemBuilder: (context, index) {
+        final category = categories[index];
+        return CategoryCard(
+          title: category.name,
+          icon: category.icon,
+          onTap: () => _navigateToBrands(context),
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.category_outlined,
+            size: 64,
+            color: AppColors.border,
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Nenhuma categoria encontrada',
+            style: TextStyle(
+              fontSize: 16,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _navigateToBrands(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const BrandsPage(),
       ),
     );
   }

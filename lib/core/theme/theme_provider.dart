@@ -2,18 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:pollar_app/core/theme/app_theme.dart';
 
 class ThemeProvider extends ChangeNotifier {
-  ThemeData _currentTheme = AppTheme.lightTheme;
+  ThemeMode _themeMode = ThemeMode.light;
 
-  ThemeData get currentTheme => _currentTheme;
+  ThemeMode get themeMode => _themeMode;
+
+  bool get isDarkMode => _themeMode == ThemeMode.dark;
+
+  ThemeData get currentTheme => isDarkMode ? AppTheme.darkTheme : AppTheme.lightTheme;
+
+  void setThemeMode(ThemeMode mode) {
+    if (_themeMode != mode) {
+      _themeMode = mode;
+      notifyListeners();
+    }
+  }
 
   void setDark(bool isDark) {
-    _currentTheme = isDark ? AppTheme.darkTheme : AppTheme.lightTheme;
+    setThemeMode(isDark ? ThemeMode.dark : ThemeMode.light);
+  }
+
+  void toggleTheme() {
+    setDark(!isDarkMode);
+  }
+
+  Future<void> loadThemePreference() async {
     notifyListeners();
   }
 
-  void toggle() {
-    final isCurrentlyDark = _currentTheme.brightness == Brightness.dark;
-    setDark(!isCurrentlyDark);
+  Future<void> saveThemePreference() async {
   }
 }
-

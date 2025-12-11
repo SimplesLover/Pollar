@@ -5,12 +5,14 @@ class PolarAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool showBackButton;
   final VoidCallback? onMenuPressed;
+  final List<Widget>? actions;
 
   const PolarAppBar({
     super.key,
     this.title = 'Pollar',
     this.showBackButton = false,
     this.onMenuPressed,
+    this.actions,
   });
 
   @override
@@ -31,58 +33,67 @@ class PolarAppBar extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
       child: SafeArea(
+        bottom: false,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              // Botão voltar
-              if (showBackButton)
-                GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: Icon(
-                      Icons.arrow_back,
-                      color: Colors.black,
-                      size: 25,
-                    ),
-                  ),
-                )
-              else
-                const SizedBox(
-                  width: 20,
-                  height: 20,
-                ),
-
-              // Título centralizado com ícone
+              _buildLeadingWidget(context),
               Expanded(
-                child: Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                child: _buildTitleWidget(),
               ),
-              const SizedBox(
-                width: 20,
-                height: 20,
-              ),
+              _buildTrailingWidget(),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildLeadingWidget(BuildContext context) {
+    if (showBackButton) {
+      return IconButton(
+        onPressed: () => Navigator.of(context).pop(),
+        icon: const Icon(
+          Icons.arrow_back,
+          color: AppColors.textPrimary,
+          size: 24,
+        ),
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(
+          minWidth: 40,
+          minHeight: 40,
+        ),
+        splashRadius: 20,
+      );
+    }
+    return const SizedBox(width: 40);
+  }
+
+  Widget _buildTitleWidget() {
+    return Center(
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary,
+          letterSpacing: 0.5,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+
+  Widget _buildTrailingWidget() {
+    if (actions != null && actions!.isNotEmpty) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: actions!,
+      );
+    }
+    return const SizedBox(width: 40);
   }
 
   @override
